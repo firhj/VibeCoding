@@ -9,3 +9,6 @@
 
 # Allow .gitignore
 !.gitignore
+
+# Allow README
+!README.md
