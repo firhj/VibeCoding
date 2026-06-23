@@ -1,0 +1,503 @@
+﻿# Wk02 - Stanford CS146S - Turning LLMs Into Autonomous Doers
+
+[00:00:00.080] We rely on large language models for
+[00:00:02.399] just about everything these days, right?
+[00:00:03.759] Writing code, drafting emails,
+[00:00:05.839] synthesizing complex research.
+[00:00:07.440] >> Oh, absolutely.
+[00:00:08.400] >> But here's the fundamental challenge
+[00:00:10.160] facing these incredibly powerful digital
+[00:00:12.718] brains.
+[00:00:13.919] >> How does a system trained exclusively on
+[00:00:16.800] static data from the past interact
+[00:00:19.519] meaningfully with the real time dynamic
+[00:00:22.079] world?
+[00:00:22.559] >> Yeah. Things that change by the second.
+[00:00:24.399] >> Exactly. like stock prices or you know
+[00:00:26.719] data that lives behind a secure API like
+[00:00:28.960] your company's Jira board.
+[00:00:30.399] >> It's the ultimate scaling bottleneck for
+[00:00:32.640] modern AI.
+[00:00:33.840] >> I mean they have truly vast deep world
+[00:00:36.000] knowledge but that knowledge is
+[00:00:37.840] instantly dated
+[00:00:38.960] >> the moment it's trained.
+[00:00:40.159] >> The moment it's trained it only updates
+[00:00:41.920] when they undergo another massive
+[00:00:43.520] multi-million dollar retraining cycle.
+[00:00:46.079] If you asked your LLM right now without
+[00:00:48.479] any external help, what is the current
+[00:00:50.640] status of my highest priority bug ticket
+[00:00:52.799] >> or what's the latest git commit on the
+[00:00:54.960] main branch?
+[00:00:55.679] >> It would have absolutely no idea. It's
+[00:00:57.520] trapped. It's in a version of the world
+[00:00:59.920] that only existed when its trading data
+[00:01:01.920] was collected.
+[00:01:02.799] >> Right? And to build truly autonomous AI
+[00:01:05.680] agents, the doers that can manage our
+[00:01:07.920] workflows, check the weather, or run
+[00:01:09.920] diagnostics, we need robust,
+[00:01:12.400] standardized, and uh secure ways to feed
+[00:01:15.920] in that dynamic realtime information.
+[00:01:18.560] >> We need reliable tool calling and R
+[00:01:20.719] capabilities that don't, you know, break
+[00:01:22.640] the bank or introduce a ton of security
+[00:01:24.640] vulnerabilities.
+[00:01:25.200] >> Yeah, exactly. But historically
+[00:01:27.359] connecting every single LLM applications
+[00:01:31.040] to every external data service API or
+[00:01:34.159] database we'll call that N services.
+[00:01:36.319] >> It meant building an M byN mess of
+[00:01:39.118] custom integrations. Every one of those
+[00:01:41.200] connections required unique code for API
+[00:01:43.840] access. You knew it off schemes, unique
+[00:01:45.920] error handlers.
+[00:01:46.799] >> Oh, and unique data format conversions.
+[00:01:48.879] It was a fragmentation and maintenance
+[00:01:50.478] nightmare.
+[00:01:50.959] >> I remember dealing with that headache 18
+[00:01:52.959] months ago. It was truly mn misery.
+[00:01:55.759] Developers were constantly just writing
+[00:01:57.680] boilerplate code to shuttle data between
+[00:01:59.759] the model and the actual tool.
+[00:02:01.200] >> So the search was on for a single
+[00:02:02.560] standard to cut through all that
+[00:02:03.840] complexity.
+[00:02:04.478] >> And that standard is the solution we are
+[00:02:06.159] deep diving into today. The model
+[00:02:08.239] context protocol
+[00:02:09.439] >> or MCP. It's an open protocol designed
+[00:02:12.560] specifically to allow systems to provide
+[00:02:14.479] context and expose tools to AI models in
+[00:02:17.598] a generalized uniform manner. So it
+[00:02:20.080] replaces that custom fragmented and
+[00:02:22.959] costly M byN system
+[00:02:24.719] >> with something much much simpler, an M
+[00:02:26.959] plusN system.
+[00:02:28.080] >> Which brings us to our analogy. Think of
+[00:02:30.159] MCP as the universal adapter for AI
+[00:02:32.878] agents.
+[00:02:33.439] >> It's really positioning itself as the
+[00:02:35.039] USBC of the AI world.
+[00:02:36.800] >> It is instead of needing 50 different
+[00:02:39.120] proprietary connectors for your LLM to
+[00:02:41.199] talk to GitHub, Stripe, and Postgres,
+[00:02:43.199] you just need one standardized plug, the
+[00:02:45.280] MCT. it just drastically reduces
+[00:02:47.840] friction across the entire ecosystem.
+[00:02:50.239] >> So our mission today is to unpack this
+[00:02:52.159] standard for you. We're going to look at
+[00:02:53.519] the core architecture and the uh
+[00:02:55.519] specific mechanics of the communication
+[00:02:57.360] >> and explore the massive and rapidly
+[00:02:59.519] growing ecosystem of specialized MCP
+[00:03:01.759] servers that have popped up
+[00:03:02.878] >> and fundamentally understand how this
+[00:03:04.479] protocol tackles the non-negotiable
+[00:03:06.479] enterprise requirements of security and
+[00:03:08.560] true interoperability.
+[00:03:10.000] >> Okay, let's jump into the core
+[00:03:11.199] mechanics. What exactly is an MCP server
+[00:03:13.919] and how does it execute these digital
+[00:03:15.598] tasks?
+[00:03:16.400] >> Okay, so at its heart, MCP is an open
+[00:03:19.120] standard that emerged just before the
+[00:03:21.039] end of 2024. Its stability comes from
+[00:03:23.919] its foundation. It's built on JSON RPC
+[00:03:26.479] 2.0.
+[00:03:27.280] >> JSON RPC 2.0. That might sound a little
+[00:03:29.759] old school to some developers. Why that?
+[00:03:32.318] >> Well, it was a strategic choice. It's
+[00:03:34.400] all about reliability and simplicity.
+[00:03:36.878] JSON RPC ensures the communications are
+[00:03:39.120] purely request response. highly
+[00:03:41.519] predictable and easy to parse, which is
+[00:03:44.158] absolutely critical when the ultimate
+[00:03:46.000] recipient is a language model that just
+[00:03:47.598] thrives on structure,
+[00:03:48.719] >> right? Makes sense.
+[00:03:49.680] >> But what's fascinating here is that it
+[00:03:50.878] takes successful concepts from the
+[00:03:52.560] software dev world, specifically the
+[00:03:54.318] language server protocol or LSP, and
+[00:03:56.878] extends them.
+[00:03:57.680] >> But unlike LSP, which is usually
+[00:03:59.598] reactive, right, it waits for you to
+[00:04:01.598] type code.
+[00:04:02.400] >> Exactly. MCP is designed for proactive
+[00:04:04.639] agentic workflows. This means the tools
+[00:04:06.878] can actually drive the conversation
+[00:04:08.158] forward based on what the agent's goal
+[00:04:09.919] is.
+[00:04:10.318] >> To understand how this conversation
+[00:04:11.598] happens, we need to nail down the
+[00:04:12.878] terminology. There's kind of a cast of
+[00:04:14.719] characters in this handshake.
+[00:04:16.399] >> There is. First, you have the host. This
+[00:04:19.279] is the application where you, the user,
+[00:04:21.600] are actually interacting. So, think of
+[00:04:23.759] sophisticated AI code editors like
+[00:04:26.240] cursor or maybe desktop app for claude.
+[00:04:28.959] >> And inside the host, there's the MCP
+[00:04:31.040] client,
+[00:04:31.680] >> right? Which is the library embedded
+[00:04:33.279] locally. This client is important
+[00:04:35.120] because it maintains a stateful session
+[00:04:36.800] for each connection it opens with a
+[00:04:38.560] server.
+[00:04:39.040] >> Okay, next up is the MCP server. This is
+[00:04:42.319] the crucial intermediary, the wrapper.
+[00:04:45.040] >> It's a lightweight piece of software
+[00:04:46.399] built right in front of the actual tool
+[00:04:48.399] or data source or API. And then finally,
+[00:04:51.519] you have the tool itself,
+[00:04:52.959] >> which is just the underlying function
+[00:04:54.560] like the actual gitpull command or a
+[00:04:56.399] complex SQL query.
+[00:04:57.759] >> Exactly. The thing the AI model can
+[00:04:59.680] ultimately invoke. Now let's walk
+[00:05:01.360] through that core interaction using your
+[00:05:03.040] example of running a git command. How
+[00:05:05.120] does that flow work?
+[00:05:06.319] >> So it begins when the client calls a
+[00:05:08.800] method usually tools list to the MCP
+[00:05:10.959] server. It's basically asking, hey, I'm
+[00:05:13.360] running a git agent. What can you do for
+[00:05:15.519] me right now?
+[00:05:16.160] >> And the server responds, I'm guessing,
+[00:05:17.600] with some kind of structured data,
+[00:05:19.199] >> a structured JSON payload. Yeah. It
+[00:05:21.199] describes every tool it offers. It'll
+[00:05:22.959] have the tool name, say get branch
+[00:05:25.519] status, a quick summary, and the full
+[00:05:27.759] JSON schema defining all the inputs and
+[00:05:30.240] parameters.
+[00:05:30.879] >> The host then takes this list and
+[00:05:32.560] injects that tool definition into the
+[00:05:34.560] LLM's context, probably in the system
+[00:05:37.199] prompt
+[00:05:37.839] >> almost always. So when you ask the
+[00:05:39.759] query, what is the status of my current
+[00:05:41.600] branch?
+[00:05:42.879] >> That prompt triggers the LLM. It
+[00:05:45.600] realizes it can't answer from memory
+[00:05:47.839] >> and so it emits a structured tool call,
+[00:05:50.000] >> right? The LOM says, "I need to call the
+[00:05:52.399] git branch status tool, maybe with some
+[00:05:55.120] arguments." That structured call goes
+[00:05:56.959] back to the MCP client,
+[00:05:58.800] >> which translates it into a precise MCP
+[00:06:02.000] request for the server.
+[00:06:03.519] >> And here's where the abstraction really
+[00:06:04.959] pays off. The MCP server executes the
+[00:06:07.439] underlying Git function. It handles the
+[00:06:09.279] API keys or credentials, runs the
+[00:06:11.199] operation, and then returns the
+[00:06:12.800] structured result in a JSON response
+[00:06:14.478] back to the client.
+[00:06:15.360] >> And the LMM agent never has to handle or
+[00:06:17.680] even know about the secrets. That
+[00:06:19.360] security layer is completely abstracted
+[00:06:21.199] away by that server client relationship.
+[00:06:23.199] >> It's a beautifully clean, secure, and
+[00:06:25.360] repeatable loop.
+[00:06:26.560] >> And that modularity makes deployment
+[00:06:28.560] incredibly flexible. Developers can
+[00:06:30.478] build these servers in pretty much any
+[00:06:32.079] programming language they want, right?
+[00:06:33.519] Python, TypeScript, Go,
+[00:06:35.680] >> Java, whatever. As long as it can talk
+[00:06:37.918] JSON, RPC, the requirement is minimal.
+[00:06:41.199] >> So, how does that communication actually
+[00:06:42.959] happen? What are the transport layers?
+[00:06:44.959] >> The most common one is Studio Standard
+[00:06:47.439] input output. That's usually for local
+[00:06:49.360] processes running side by side. But for
+[00:06:51.680] true remote communication which you need
+[00:06:53.600] for cloud hosted AI agents, MCP supports
+[00:06:57.120] server sent events or SSE.
+[00:07:00.160] >> Why SSE? Why not just you know standard
+[00:07:03.360] HTTP polling?
+[00:07:04.800] >> Because SSE allows the server to
+[00:07:06.639] continuously push updates and maintain
+[00:07:08.560] that stateful session without the client
+[00:07:10.478] having to constantly check in.
+[00:07:11.839] >> Ah so for longunning processes like a
+[00:07:13.839] database migration.
+[00:07:15.038] >> Exactly. The server can proactively send
+[00:07:17.279] updates back to the client using that
+[00:07:18.959] SSSE channel, maintaining that crucial
+[00:07:21.120] continuous contextrich interaction.
+[00:07:23.360] >> That flexibility and standardization
+[00:07:25.279] coupled with being language agnostic has
+[00:07:27.360] clearly created a massive surge in
+[00:07:29.199] tools.
+[00:07:29.598] >> Oh, it has exploded.
+[00:07:30.800] >> Which brings us right to the ecosystem.
+[00:07:32.800] >> The reference implementations from the
+[00:07:34.639] MCP steering group alone show the
+[00:07:36.560] incredible range. You've got servers for
+[00:07:38.720] general data access like everything and
+[00:07:41.279] fetch for web content,
+[00:07:42.800] >> essential utilities like time,
+[00:07:44.879] >> right? and deep functional servers for
+[00:07:46.959] file system access, git operations, and
+[00:07:49.759] even memory servers that act like
+[00:07:51.759] knowledge graphs.
+[00:07:52.560] >> And when you look at thirdparty
+[00:07:53.839] offerings, especially in the enterprise
+[00:07:55.360] space, the scale becomes immense.
+[00:07:57.839] Official integrations exist for major
+[00:08:00.000] developer tools. We're talking Atlassian
+[00:08:02.240] for Jira and Confluence, GitHub,
+[00:08:04.800] Cloudflare, payment platforms like
+[00:08:07.038] Stripe,
+[00:08:07.680] >> major data platforms like Postgres
+[00:08:09.199] School, MongoDB, Data Bricks,
+[00:08:11.439] >> and even highly specialized servers that
+[00:08:13.199] wrap AWS and Azure services.
+[00:08:15.279] >> Beyond the official enterprise tools
+[00:08:16.959] though, the community servers really
+[00:08:18.959] show the breadth of what this protocol
+[00:08:20.720] unlocks.
+[00:08:21.439] >> Totally. The barrier to entry is so low
+[00:08:23.680] that people have quickly stood up
+[00:08:25.038] servals for domains you might not have
+[00:08:26.879] expected to be AI enabled this fast.
+[00:08:29.279] Like what
+[00:08:30.000] >> I mean servers for blockchain platforms
+[00:08:31.918] like Binance and Salana, gaming
+[00:08:33.839] integrations for chess.com, browser
+[00:08:36.000] automation with Playright
+[00:08:37.440] >> and even specialized data sources from
+[00:08:39.519] government bodies like NASA or servers
+[00:08:41.759] focused on niche fields like Brazilian
+[00:08:43.839] law.
+[00:08:44.320] >> Yeah, that one's wild.
+[00:08:45.519] >> So that explosion of tools is great, but
+[00:08:47.440] if anyone can build a server in any
+[00:08:49.360] language, how does an agent or developer
+[00:08:51.759] find the right one? It sounds like a new
+[00:08:53.919] kind of fragmentation, a discovery
+[00:08:56.000] nightmare. And that's the exact problem
+[00:08:57.839] the model context protocol registry
+[00:08:59.839] solved when it launched in September
+[00:09:02.000] 2025.
+[00:09:02.958] >> The MCT registry,
+[00:09:04.559] >> its whole purpose is to be the official
+[00:09:07.039] centralized and open catalog and API for
+[00:09:10.080] all publicly available MCP servers. It
+[00:09:12.799] standardizes discoverability moving
+[00:09:15.120] beyond just simple keyword searches. So
+[00:09:17.600] this registry acts as the primary source
+[00:09:19.440] of truth and other public marketplaces
+[00:09:21.600] maybe integrated into ideides or even
+[00:09:23.679] private enterprise subregistries can
+[00:09:25.278] build on top of it.
+[00:09:26.159] >> Precisely. It ensures everyone is
+[00:09:27.919] looking at the same trusted list and
+[00:09:30.000] crucially this centralization allows for
+[00:09:32.240] communitydriven moderation
+[00:09:33.679] >> so they can deny list bad actors.
+[00:09:35.600] >> Right. The registry has a clear
+[00:09:37.519] mechanism to deny list servers that
+[00:09:39.839] violate guidelines. You know, if a
+[00:09:41.600] server has malicious code or tries to
+[00:09:43.919] spam or violates licensing, it can be
+[00:09:46.559] retroactively removed from public view.
+[00:09:48.559] It enforces a baseline of trust.
+[00:09:50.799] >> Okay, so let's look at a practical
+[00:09:52.320] application. The Cloudflare deployment
+[00:09:54.320] guide excerpt in our sources is a great
+[00:09:56.399] example of how simple this is for
+[00:09:58.080] developers.
+[00:09:58.720] >> It is the guide highlights the practical
+[00:10:00.559] reality of deployment.
+[00:10:02.000] >> Developers usually have two main paths
+[00:10:03.919] on these serverless platforms. Okay,
+[00:10:05.759] >> they can deploy a server without
+[00:10:07.200] authentication, which is fine for public
+[00:10:10.080] general tasks, or more commonly, they
+[00:10:12.879] deploy it with authentication and
+[00:10:14.320] authorization,
+[00:10:15.200] >> meaning the user has to sign in and
+[00:10:16.879] permissions control exactly which tools
+[00:10:18.799] an agent can call.
+[00:10:19.679] >> Yep. Which is key for enterprise
+[00:10:21.360] security. The streamlining is massive.
+[00:10:23.679] You get a live server, often at a
+[00:10:25.278] workers.dev, a subdomain that any MCP
+[00:10:27.839] client can connect to immediately. That
+[00:10:29.679] reduction in friction is the core driver
+[00:10:31.759] of adoption here. That brings us to the
+[00:10:34.000] most critical layer of all security
+[00:10:36.879] because while the functionality is
+[00:10:38.480] robust, the sources highlight a pretty
+[00:10:41.039] significant early limitation of the
+[00:10:42.799] protocol that needed to be fixed.
+[00:10:44.399] >> It did. Let's talk about that early
+[00:10:46.320] security hurdle, their early MCP
+[00:10:48.799] implementations. So up until late 2024,
+[00:10:51.679] early 2025,
+[00:10:53.679] they just lacked a truly standardized
+[00:10:56.000] robust O mechanism. So it was this
+[00:10:58.480] genius protocol, but it was hampered by
+[00:11:00.078] a single point of failure, credential
+[00:11:02.078] management. What did that look like in
+[00:11:04.078] practice?
+[00:11:04.720] >> In practice, it meant that for secure
+[00:11:06.399] operation, developers were often forced
+[00:11:08.240] to run their servers locally alongside
+[00:11:10.159] the client,
+[00:11:10.799] >> which kind of defeats the purpose of
+[00:11:12.159] cloud agents.
+[00:11:12.958] >> It totally does. Or they had to rely on
+[00:11:15.519] manual outofband provisioning of
+[00:11:17.278] sensitive credentials like API keys
+[00:11:19.440] directly to the remote server. So if you
+[00:11:21.679] wanted a cloud agent to securely access
+[00:11:23.679] your GitHub repo, you had to manually
+[00:11:26.000] upload your GitHub token to that server
+[00:11:28.559] instance.
+[00:11:29.440] >> Yes. Which simply does not scale for
+[00:11:32.639] secure remote multi-user access in a
+[00:11:35.200] sauce environment. If you have 10,000
+[00:11:37.839] users who want to connect their
+[00:11:39.120] individual credentials to a single
+[00:11:41.039] shared agent, manual key handling
+[00:11:43.440] becomes impossible and incredibly
+[00:11:45.679] dangerous.
+[00:11:46.399] >> Right? So that problem was severely
+[00:11:48.240] hindering MCP from reaching its
+[00:11:50.078] internet-based multi-tenant potential.
+[00:11:52.799] >> Precisely. The solution which was
+[00:11:54.639] adopted really rapidly by the community
+[00:11:56.720] was integrating OUTH 2.0 as the secure
+[00:12:00.480] scalable standard for authorization.
+[00:12:02.559] >> And the adoption of Oath 2.0 just
+[00:12:04.399] changes the game entirely. It provides
+[00:12:06.240] features we take for granted in modern
+[00:12:08.159] webdev like dynamic client registration
+[00:12:10.720] >> and automatic endpoint discovery which
+[00:12:12.559] cuts down on configuration overhead. But
+[00:12:14.559] most importantly, it ensures secure
+[00:12:16.399] authorization and token management.
+[00:12:18.320] >> That's the key. It means you, the user,
+[00:12:20.720] authorize the agent once via OOTH. And
+[00:12:23.360] the system guarantees that the MCP
+[00:12:25.039] client can only access the specific
+[00:12:26.799] resources you explicitly permitted
+[00:12:28.720] within a defined scope using shortlived
+[00:12:30.879] tokens.
+[00:12:31.440] >> This finally brings proper modern
+[00:12:33.600] security and compliance to cloud hosted
+[00:12:35.679] MCT agents.
+[00:12:36.799] >> It does. And the standardization is
+[00:12:39.519] really the aha moment when you compare
+[00:12:42.240] MCP to older approaches.
+[00:12:44.399] >> Like comparing it to building custom
+[00:12:46.639] integrations from scratch, the benefit
+[00:12:49.120] is obvious. MCP replaces all that
+[00:12:51.679] manually written brittle code with a
+[00:12:53.919] single reliable plug-and-play protocol.
+[00:12:56.320] >> And what about compared to the much
+[00:12:58.078] hyped chat GPT plugins that we saw
+[00:13:00.559] earlier in the AI wave?
+[00:13:01.839] >> Well, plugins were proprietary. They
+[00:13:03.519] were tied to a single platform and often
+[00:13:05.360] they functioned as single shot calls.
+[00:13:07.039] you called the API, got an answer, and
+[00:13:08.958] the interaction ended. There was no deep
+[00:13:10.639] session context.
+[00:13:11.600] >> Whereas MCP, conversely, is an open
+[00:13:13.919] standard. It fully supports those
+[00:13:15.919] continuous contextrich two-way
+[00:13:18.159] interactions through that stateful
+[00:13:19.679] session.
+[00:13:20.078] >> And it now has that unified secure OU
+[00:13:22.958] standard. It's a fundamental
+[00:13:24.159] architectural upgrade from those early
+[00:13:26.078] proprietary plug-in models.
+[00:13:27.440] >> Okay, so final comparison. Let's address
+[00:13:29.440] existing LLM tool frameworks like
+[00:13:31.120] Langchain. We know these frameworks let
+[00:13:33.039] developers implement tools. What's the
+[00:13:34.720] clear demarcation line between a
+[00:13:36.320] framework and a protocol?
+[00:13:37.600] >> That's the most important distinction
+[00:13:38.879] for our technical listeners. Langchain
+[00:13:40.958] and similar frameworks provide a
+[00:13:42.480] developerfacing standard for tool
+[00:13:44.320] implementation. You define your tool
+[00:13:46.399] logic in Python using their wrappers.
+[00:13:48.399] >> But MCP is a modelf facing protocol that
+[00:13:51.120] enables dynamic tool discovery at
+[00:13:53.039] runtime.
+[00:13:54.000] >> So if I'm running an agent, that agent
+[00:13:55.919] doesn't even need a compile time
+[00:13:57.360] dependency on say the specific Postgress
+[00:14:00.399] driver or the GitHub SDK.
+[00:14:02.480] >> Not at all. It just needs to know the
+[00:14:04.399] location of a reliable MCP server that
+[00:14:06.958] wraps those tools.
+[00:14:08.159] >> So an agent using MCP can literally
+[00:14:10.559] discover and use a completely new tool
+[00:14:12.799] like that one for Brazilian law data
+[00:14:15.120] without the agents core code needing to
+[00:14:17.120] explicitly include it beforehand.
+[00:14:18.879] >> Exactly. It decouples the agents logic
+[00:14:20.958] and dependencies from the tools
+[00:14:22.480] availability and implementation. That is
+[00:14:24.480] the definition of true scalable
+[00:14:26.480] interoperability. So what does this all
+[00:14:28.639] mean for someone looking to build AI
+[00:14:30.720] applications or just understand where
+[00:14:32.320] the industries go?
+[00:14:33.278] >> It means the model context protocol is
+[00:14:35.039] the standard that successfully
+[00:14:36.320] transitions AI assistance from being
+[00:14:38.159] these uh siloed geniuses restricted by
+[00:14:41.519] static knowledge
+[00:14:42.639] >> to becoming welle equipped integrated
+[00:14:44.958] engineers that can securely access and
+[00:14:47.198] act upon the entire real world of data
+[00:14:49.919] and external services.
+[00:14:51.440] >> Yeah. By standardizing that
+[00:14:53.120] communication layer, it just reduces
+[00:14:55.120] integration friction so dramatically and
+[00:14:57.519] makes AI systems inherently more
+[00:14:59.440] scalable across every single industry.
+[00:15:01.759] >> It sounds like the plumbing problem is
+[00:15:03.600] largely solved. But the sources do hint
+[00:15:06.958] at a potential roadblock still ahead,
+[00:15:09.120] centered not on the tool communication,
+[00:15:10.958] but on the LLM itself.
+[00:15:12.480] >> They do. Despite the massive success of
+[00:15:14.399] MCP in standardizing the delivery of
+[00:15:16.559] information, certain LLM limitations
+[00:15:19.278] still exist. Today's models, they don't
+[00:15:22.399] handle a huge number of available tools
+[00:15:24.480] very well. Their reasoning can degrade
+[00:15:26.480] when they're presented with too many
+[00:15:27.759] options.
+[00:15:28.320] >> And critically, the results returned
+[00:15:29.759] from APIs, even beautifully standardized
+[00:15:32.320] JSON results, can still quickly overload
+[00:15:34.720] the LLM's context window if they are too
+[00:15:36.720] verbose.
+[00:15:37.360] >> That's a huge one.
+[00:15:38.320] >> This raises an important and I think
+[00:15:40.000] provocative question for you, the
+[00:15:41.440] developer, the entrepreneur, or the
+[00:15:43.198] curious learner listening. Moving
+[00:15:44.879] forward, must developers design APIs
+[00:15:47.278] themselves to be truly AI native,
+[00:15:49.759] >> meaning simplified, summarized, or
+[00:15:51.519] highly curated data sets?
+[00:15:53.198] >> Exactly. rather than simply exporting
+[00:15:55.120] rigid legacy interfaces in order to
+[00:15:57.839] maximize the full long-term potential of
+[00:16:00.480] standardized protocols like MCP. That
+[00:16:02.639] transition from legacy interfaces to AI
+[00:16:05.839] optimized data endpoints.

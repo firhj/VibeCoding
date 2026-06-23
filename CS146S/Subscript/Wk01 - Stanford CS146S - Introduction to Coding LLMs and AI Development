@@ -1,0 +1,446 @@
+﻿# Wk01 - Stanford CS146S - Introduction to Coding LLMs and AI Development
+
+[00:00:00.080] We've all interacted with them. Large
+[00:00:01.839] language models. I mean, whether it's
+[00:00:03.759] asking chat GPT for a recipe or having
+[00:00:06.318] an AI summarize a huge document,
+[00:00:08.480] >> right?
+[00:00:08.880] >> You hit send and almost instantly you
+[00:00:11.279] get something back that feels
+[00:00:12.480] intelligent. But what's actually
+[00:00:14.558] happening in that black box after you
+[00:00:16.559] hit send?
+[00:00:17.679] >> And maybe more importantly, what
+[00:00:19.039] happened for months or even years before
+[00:00:21.439] you ever typed that first prompt?
+[00:00:23.359] >> Exactly.
+[00:00:23.920] >> That's the core question we're diving
+[00:00:25.278] into today. This deep dive is really
+[00:00:28.000] about pulling back the curtain on this
+[00:00:30.320] incredible uh multi-stage engineering
+[00:00:33.359] pipeline that transforms raw messy
+[00:00:36.399] internet data into the AI assistant you
+[00:00:39.600] use.
+[00:00:40.000] >> So we're talking about the fundamental
+[00:00:41.280] stages of training.
+[00:00:42.238] >> Yep. We're tracking the three big ones.
+[00:00:44.320] Pre-training, supervised fine-tuning,
+[00:00:46.320] and reinforcement learning. And then
+[00:00:48.000] we'll get into the advanced prompting
+[00:00:49.520] techniques you actually need to command
+[00:00:50.960] these things. Our sources today come
+[00:00:52.799] from some pretty deep technical papers
+[00:00:54.799] and engineering lectures that you know
+[00:00:56.479] they really reveal the stunning scale
+[00:00:58.238] and the clever tricks behind all of
+[00:00:59.759] this.
+[00:01:00.558] >> So our mission for you the learner is to
+[00:01:03.198] really get the true architecture of
+[00:01:04.879] these systems.
+[00:01:05.599] >> We're going to trace the model's
+[00:01:06.799] evolution from what trillions of pieces
+[00:01:09.680] of text it consumes all the way up to
+[00:01:11.519] the methods that make it seem like it
+[00:01:12.879] can reason.
+[00:01:13.760] >> So let's start at the very beginning.
+[00:01:15.438] Before an LLM is a helpful assistant, it
+[00:01:17.759] starts as what we call a base model. And
+[00:01:19.840] what is that functionally?
+[00:01:21.359] >> Functionally, it is a massive highly
+[00:01:24.560] sophisticated text completion machine.
+[00:01:26.719] The goal of this first stage
+[00:01:28.239] pre-training is just knowledge
+[00:01:30.719] acquisition on a scale that is genuinely
+[00:01:33.920] um hard to wrap your head around.
+[00:01:35.438] >> The first step being data gathering,
+[00:01:37.040] which I know from the sources is just
+[00:01:38.959] biblical in scope.
+[00:01:40.159] >> It really is. It begins with this
+[00:01:41.759] intense data scraping mostly from the
+[00:01:44.078] deep archives of the internet. The
+[00:01:45.920] biggest source is often common crawl.
+[00:01:48.000] That's the nonprofit that's been
+[00:01:49.438] indexing the web for years
+[00:01:50.719] >> since 2007. Yeah. Over 2.7 billion
+[00:01:53.359] pages. And then that raw internet data
+[00:01:55.759] is combined with, you know, highquality
+[00:01:57.840] curated documents, the Wikipedia,
+[00:02:00.078] academic journals, public code from
+[00:02:01.759] GitHub.
+[00:02:02.478] >> You said the data is raw, which I mean
+[00:02:04.799] that must be incredibly messy. I know
+[00:02:06.560] they don't just dump the entire internet
+[00:02:08.318] into the model.
+[00:02:09.038] >> Oh, they absolutely can't. The filtering
+[00:02:10.560] process is ruthless. They remove
+[00:02:12.719] everything. spam, malware, known racist
+[00:02:15.919] content, adult material, even just
+[00:02:17.759] repetitive text.
+[00:02:18.800] >> But even after all that culling, the
+[00:02:20.479] data sets are still astronomical
+[00:02:22.878] >> completely. A representative,
+[00:02:24.479] highquality public data set like fine
+[00:02:26.800] web, it still clocks in at about 44 tab
+[00:02:29.919] of text data.
+[00:02:30.800] >> Wait, 44 terabytes of just text? That's
+[00:02:33.360] dizzying.
+[00:02:34.000] >> It is. And that text needs to be
+[00:02:36.000] processed. It gets converted into
+[00:02:37.439] sequences of tokens
+[00:02:39.439] >> which are basically small chunks of
+[00:02:41.039] text. A word or even part of a word.
+[00:02:43.519] >> Exactly. And that fine web data set
+[00:02:45.519] alone translates to approximately 15
+[00:02:48.080] trillion tokens. 15,000 billion pieces
+[00:02:51.199] of training data that the model has to
+[00:02:52.800] absorb.
+[00:02:53.360] >> So we have the trillions of tokens. Now
+[00:02:55.199] what's the core mechanical operation
+[00:02:57.039] here? What are those billions of dollars
+[00:02:58.479] in GPUs actually doing?
+[00:03:00.318] >> Well, the mechanism is conceptually
+[00:03:02.239] surprisingly simple. LLMs are auto
+[00:03:04.719] reggressive models. All that means is
+[00:03:06.800] that they are predicting the probability
+[00:03:08.479] of the next token in a sequence based
+[00:03:10.959] entirely on the text that came before
+[00:03:12.560] it. If I say the cats on the
+[00:03:15.199] >> the model predicts Matt rug or something
+[00:03:17.840] like that.
+[00:03:18.318] >> Precisely. It calculates the most
+[00:03:20.239] probable completion. Yeah.
+[00:03:21.680] >> And modern models can handle a stunning
+[00:03:23.598] amount of context to make that
+[00:03:24.959] prediction.
+[00:03:25.519] >> Right. The context window, it's working
+[00:03:27.680] memory has gotten huge.
+[00:03:29.519] >> It's grown exponentially. An older model
+[00:03:31.680] like GPT2 could only handle maybe a
+[00:03:34.158] thousand tokens of context. Modern ones
+[00:03:36.959] can look back at hundreds of thousands,
+[00:03:38.639] sometimes even a million tokens.
+[00:03:40.400] >> And this prediction is all mathematical.
+[00:03:42.400] It runs that context through a neural
+[00:03:44.239] network with billions or even trillions
+[00:03:46.239] of adjustable parameters.
+[00:03:47.680] >> Think of them like knobs on a giant
+[00:03:49.439] mixing board. 1.6 billion for GPT2,
+[00:03:52.639] maybe a reported 1.8 trillion for GPT4.
+[00:03:55.680] >> And training is just the process of
+[00:03:57.519] nudging those knobs over and over. So
+[00:03:59.598] the model's prediction of the next token
+[00:04:01.598] matches what was actually in the
+[00:04:03.360] training data
+[00:04:04.479] >> millions of times per second. And this
+[00:04:06.479] optimization requires an almost
+[00:04:08.239] unbelievable amount of specialized
+[00:04:10.400] computational power.
+[00:04:11.598] >> This is the gold rush you mentioned.
+[00:04:13.120] >> It is. Companies are rushing to rent
+[00:04:15.039] these massive machines like an Apex H100
+[00:04:18.000] GPU node which can cost about $3 per GPU
+[00:04:21.759] per hour. The sheer expense is why
+[00:04:24.720] training a big foundational model costs
+[00:04:27.279] tens of millions of dollars. That cost
+[00:04:29.519] analysis really dictates the whole
+[00:04:31.279] structure of the industry, doesn't it?
+[00:04:33.120] Only a few players can even afford to
+[00:04:35.120] create these base models.
+[00:04:36.319] >> It does because every single one of
+[00:04:38.079] those expensive machines is just trying
+[00:04:39.759] to predict the next token faster and
+[00:04:41.918] more accurately.
+[00:04:42.800] >> So the goal of pre-training is to create
+[00:04:44.800] a massive lossy compression of the
+[00:04:47.199] internet.
+[00:04:47.680] >> That's a powerful way to think about it.
+[00:04:49.519] A probabilistic zip file of human
+[00:04:51.519] knowledge.
+[00:04:52.079] >> But if it's compressed, what information
+[00:04:54.240] gets lost?
+[00:04:55.040] >> Well, it loses nuance. It loses the
+[00:04:57.439] ability to reason or to understand what
+[00:05:00.160] is truthful versus what is just common
+[00:05:02.000] on the internet. It learns the syntax of
+[00:05:04.240] knowledge but not really the deep
+[00:05:06.319] structure of logic
+[00:05:07.279] >> which leads us perfectly into the next
+[00:05:08.879] stage that base model that expensive
+[00:05:11.279] autocomplete is not what we use when we
+[00:05:13.199] talk to chat GPT.
+[00:05:14.720] >> Exactly. The output of pre-training is
+[00:05:16.959] just the base model. To turn it into a
+[00:05:19.279] helpful conversational assistant, we
+[00:05:21.680] have to enter the post-training stages.
+[00:05:23.759] And this starts with supervised
+[00:05:25.360] fine-tuning or SFT.
+[00:05:27.279] >> SFT is the first step in shaping the
+[00:05:29.519] model's personality. And it's
+[00:05:31.439] computationally way cheaper. We're
+[00:05:33.279] talking hours instead of months.
+[00:05:34.879] >> And you swap out the data,
+[00:05:36.240] >> right? We swap the raw internet text for
+[00:05:38.959] a smaller, highly curated data set,
+[00:05:41.759] hundreds of thousands of examples of
+[00:05:43.519] highquality dialogues.
+[00:05:44.879] >> This is where human labelers come in.
+[00:05:46.399] They're basically defining the AI's
+[00:05:48.000] persona.
+[00:05:48.800] >> Absolutely. Humans are hired, given
+[00:05:50.478] these really strict, detailed
+[00:05:52.240] instructions, and they're tasked with
+[00:05:54.079] writing the ideal assistant response for
+[00:05:56.319] all kinds of prompts. They're literally
+[00:05:58.478] teaching the LLM to adopt that helpful,
+[00:06:00.560] truthful, and harmless persona by
+[00:06:02.478] example.
+[00:06:03.279] >> So, when I talk to an AI assistant, I'm
+[00:06:05.199] not talking to some new form of
+[00:06:06.478] intelligence. I'm interacting with a
+[00:06:08.399] neural network that is simulating the
+[00:06:10.240] average, highly skilled human labeler
+[00:06:12.959] who followed those instructions
+[00:06:14.240] perfectly.
+[00:06:14.879] >> That's the simplest way to put it. Yeah.
+[00:06:16.639] you're talking to the most expensive,
+[00:06:18.478] highly optimized simulation of human
+[00:06:20.478] customer service ever built.
+[00:06:22.160] >> Okay. So, once the model has the right
+[00:06:24.319] persona, we need to teach it how to
+[00:06:26.720] actually solve problems.
+[00:06:27.918] >> And that moves us to the third most
+[00:06:29.759] advanced stage, reinforcement learning
+[00:06:32.160] or RL.
+[00:06:33.680] >> How is this different from SFT?
+[00:06:35.759] >> SFT taught it what to say. RL teaches it
+[00:06:39.279] how to think. With RL, the model can
+[00:06:42.478] practice problem solving in verifiable
+[00:06:44.478] domains like math and code where we know
+[00:06:47.360] for a fact what the correct final answer
+[00:06:49.279] is.
+[00:06:49.839] >> So you give it the problem and the
+[00:06:51.439] answer, but it has to figure out how to
+[00:06:52.959] get there.
+[00:06:53.439] >> It has to discover the sequence of
+[00:06:55.038] tokens that reliably leads to that
+[00:06:57.279] result. And this is where it gets truly
+[00:06:59.360] fascinating
+[00:07:00.079] >> because this is where we see the model's
+[00:07:02.000] cognitive strategies emerge. It learns
+[00:07:03.839] to think by um creating a kind of
+[00:07:06.240] internal monologue.
+[00:07:07.279] >> That's right. Because the model has
+[00:07:08.879] finite computation per token, it learns
+[00:07:11.038] it has to distribute its reasoning
+[00:07:12.560] across multiple tokens. We call this
+[00:07:14.478] chain of thought or coach a day.
+[00:07:16.079] >> So if you just ask it to spit out the
+[00:07:17.839] answer to a hard math problem in one go,
+[00:07:20.079] it fails.
+[00:07:20.959] >> It will consistently fail at the mental
+[00:07:22.639] arithmetic. Yeah. You have to train it
+[00:07:25.038] to spread out the calculation step by
+[00:07:26.879] step.
+[00:07:27.279] >> That's the key takeaway for the user
+[00:07:29.038] right there. The model needs tokens to
+[00:07:31.519] think. If you don't let it think step by
+[00:07:33.680] step, you're asking it to do calculus
+[00:07:35.439] without any scratch paper. Precisely.
+[00:07:38.000] Now, this pure RL process works great
+[00:07:40.240] when the answer is objectively
+[00:07:42.560] verifiable. Math, code, chess.
+[00:07:46.000] >> But what about things that are
+[00:07:47.199] subjective, like writing a joke or a
+[00:07:49.839] persuasive essay?
+[00:07:51.279] >> For those domains, companies use an
+[00:07:52.879] adaptation called reinforcement learning
+[00:07:54.800] from human feedback or RLHF.
+[00:07:57.680] >> This is where they train a second AI, a
+[00:07:59.680] reward model, to act like a human judge.
+[00:08:01.839] >> Correct. A human ranks different AI
+[00:08:03.519] outputs and the reward model learns to
+[00:08:05.598] replicate those rankings. It becomes a
+[00:08:07.120] proxy for human taste.
+[00:08:08.639] >> But the sources point out a major
+[00:08:10.319] drawback here.
+[00:08:11.279] >> They do. Reinforcement learning is
+[00:08:12.959] extremely good at finding ways to gain
+[00:08:14.800] any simulation. The LLM can learn to
+[00:08:17.598] generate content that just tricks the
+[00:08:19.439] reward model into giving a high score,
+[00:08:21.519] prioritizing optimization over genuine
+[00:08:23.759] quality.
+[00:08:24.560] >> So RHF is powerful, but it's a
+[00:08:26.959] short-lived process. The model will
+[00:08:29.038] eventually learn to exploit the reward
+[00:08:31.038] system.
+[00:08:31.839] >> Exactly. Human oversight remains
+[00:08:34.158] mandatory.
+[00:08:35.519] >> Okay. So once you have this highly
+[00:08:37.200] trained model knowledge, personality and
+[00:08:40.000] some reasoning ability, the final stage
+[00:08:42.000] is all about prompt engineering.
+[00:08:44.080] >> Right. The art of command. It's
+[00:08:45.839] basically programming the model through
+[00:08:48.000] conversation.
+[00:08:49.039] >> A foundational technique here is in
+[00:08:51.278] context learning. Kshot prompting.
+[00:08:53.919] >> Yep. You just give the model a few
+[00:08:55.679] examples, maybe one, three, or five,
+[00:08:57.839] right inside the prompt itself.
+[00:08:59.519] >> So if I need it to translate sentences
+[00:09:01.679] into Korean using a very specific
+[00:09:04.000] honorific style,
+[00:09:05.200] >> you just give a one or two examples of
+[00:09:06.639] that exact style and the model instantly
+[00:09:09.120] adapts. It learns the pattern in
+[00:09:10.639] context.
+[00:09:11.278] >> But for more complex logical tasks, we
+[00:09:13.919] have to go back to chain of thought. we
+[00:09:15.679] have to. And even a simple instruction
+[00:09:17.519] like let's think step by step which is
+[00:09:19.360] called zeroot cot. It dramatically
+[00:09:22.879] improves accuracy. You're unlocking the
+[00:09:25.039] model's ability to reason out loud.
+[00:09:26.799] >> But the model's knowledge is frozen in
+[00:09:28.559] time, right? It doesn't know what
+[00:09:29.839] happened yesterday or what's in my
+[00:09:31.200] company's private database.
+[00:09:32.720] >> And that is why external tools are so
+[00:09:35.278] critical for real world tasks,
+[00:09:38.159] particularly retrieval augmented
+[00:09:39.839] generation or agg. A is our crucial
+[00:09:43.519] defense against hallucinations. It's
+[00:09:45.759] like giving the AI a smart Google search
+[00:09:48.320] function.
+[00:09:49.039] >> That's a great way to frame it. The LLM
+[00:09:51.039] realizes it needs current information,
+[00:09:53.200] so it generates special tokens that
+[00:09:55.278] invoke a tool, like a web search,
+[00:09:57.360] >> and the results of that search get fed
+[00:09:59.440] back into the AI's working memory,
+[00:10:01.440] >> inserted directly into its context
+[00:10:03.278] window right before it generates the
+[00:10:05.120] final answer. It forces the model to use
+[00:10:07.440] current facts instead of just its old
+[00:10:09.759] training memory. We can refine this even
+[00:10:11.600] more with selfcorrection techniques
+[00:10:13.440] >> for sure. Take self-consistency. Instead
+[00:10:15.519] of asking the model a question once, you
+[00:10:17.919] ask it five times. You force it to find
+[00:10:20.399] five different reasoning paths and then
+[00:10:22.159] you take the majority answer.
+[00:10:23.440] >> That cuts down on random errors. And
+[00:10:25.759] then there's reflection, which is great
+[00:10:27.440] for coding.
+[00:10:28.159] >> It's fantastic. You feed an error
+[00:10:29.919] message back into the prompt and ask the
+[00:10:31.679] model to critique and revise its own
+[00:10:33.600] code. You're teaching it to learn from
+[00:10:35.600] its mistakes in real time. These
+[00:10:37.519] techniques are what separate simple
+[00:10:39.120] chatting from high leverage professional
+[00:10:41.120] use.
+[00:10:41.759] >> Absolutely. Which brings us to the core
+[00:10:43.759] shift happening for professionals. The
+[00:10:45.759] discussion is always about replacement.
+[00:10:48.078] >> But the material highlights a different
+[00:10:50.078] idea. The mantra is you won't be
+[00:10:52.879] replaced by AI. You'll be replaced by a
+[00:10:55.600] competent engineer who knows how to use
+[00:10:57.839] AI.
+[00:10:58.799] >> The LLM isn't replacing the engineer.
+[00:11:01.039] It's augmenting them. Turning a regular
+[00:11:03.679] engineer into a hyperefficient one. We
+[00:11:06.240] see this with internal use of places
+[00:11:07.759] like OpenAI with their codeex models.
+[00:11:10.000] >> Okay, let's take a concrete example code
+[00:11:12.480] understanding. An engineer pastes a
+[00:11:14.639] stack trace from an error. Normally
+[00:11:16.000] that's an hour of digging,
+[00:11:17.278] >> right? Instead, they prompt the model.
+[00:11:19.360] Given this stack trace, locate the O
+[00:11:21.839] logic in this repo and trace the data
+[00:11:23.839] flow. That saves 45 minutes just like
+[00:11:26.399] that.
+[00:11:26.799] >> Refactoring is another huge one.
+[00:11:28.320] Updating a legacy API call across dozens
+[00:11:30.879] of files, that's a tedious three-hour
+[00:11:32.559] manual job. With an LLM, you're prompted
+[00:11:35.120] to apply this change consistently across
+[00:11:37.440] all 40 files and it takes 90 seconds.
+[00:11:40.000] That's real leverage.
+[00:11:41.200] >> Or performance optimization.
+[00:11:43.519] Instead of hunting for a bottleneck for
+[00:11:45.360] an hour, you have the model analyze the
+[00:11:47.759] code, flag the slow database calls, and
+[00:11:51.120] draft a fix.
+[00:11:52.320] >> 30 minutes of work becomes 5 minutes of
+[00:11:54.240] prompting. And finally, QA and testing.
+[00:11:57.888] [snorts] You can point the model at low
+[00:11:59.440] coverage code overnight and wake up to
+[00:12:01.600] runnable unit tests that cover edge
+[00:12:03.440] cases a human might have missed.
+[00:12:05.360] >> But to get this kind of precision, you
+[00:12:07.360] can't just type a casual request. There
+[00:12:09.278] are best practices.
+[00:12:10.639] >> Yes. First is role prompting. You have
+[00:12:13.360] to aggressively define the persona. You
+[00:12:15.600] are a helpful assistant that loves
+[00:12:17.278] programming at the level of a senior
+[00:12:18.879] software developer.
+[00:12:19.759] >> And structured prompts using tags like
+[00:12:22.480] error or log when you paste in complex
+[00:12:24.879] data so the model can parse it
+[00:12:26.399] efficiently. And the most advanced
+[00:12:27.919] technique is persistent context.
+[00:12:30.159] Engineers will keep a file like
+[00:12:32.000] agents.mmd with all the business logic
+[00:12:34.720] and naming conventions the AI can't
+[00:12:36.559] possibly know
+[00:12:37.360] >> and they paste that context into every
+[00:12:39.360] session.
+[00:12:39.839] >> Yep. It keeps the model informed and
+[00:12:41.600] dramatically improves accuracy across
+[00:12:43.360] all your prompts. So, we've charted this
+[00:12:46.000] whole path today from trillions of raw
+[00:12:49.039] internet tokens through humanlabeled
+[00:12:51.278] conversations that give the AI its
+[00:12:53.278] personality right up to the advanced
+[00:12:55.839] reasoning that requires chain of
+[00:12:57.519] thought.
+[00:12:58.078] >> The core takeaway for you, the learner,
+[00:13:00.000] is that LLMs are powerful, but they have
+[00:13:03.039] these uh cognitive deficits. We call it
+[00:13:05.759] the Swiss cheese model of capability.
+[00:13:07.919] >> The holes don't line up
+[00:13:09.360] >> exactly. It can solve an olympied level
+[00:13:11.440] math problem but then failed to compare
+[00:13:13.759] two simple numbers like 9.1 and 9.9. You
+[00:13:16.720] have to treat them as stochastic tools.
+[00:13:18.799] Always check their work and use these
+[00:13:20.720] techniques to compensate for their
+[00:13:22.000] limitations.
+[00:13:22.639] >> Okay, let's unpack this for one final
+[00:13:24.399] thought. Something for you to really
+[00:13:25.600] maul over after this deep dive.
+[00:13:27.440] >> When LLMs are trained with pure
+[00:13:29.278] reinforcement learning on problems where
+[00:13:30.879] the answer is verifiable, the model
+[00:13:32.958] isn't constrained by human logic. We saw
+[00:13:35.440] this years ago with AlphaGo discovering
+[00:13:37.360] move 37. this brilliant totally
+[00:13:39.759] unforeseen strategy,
+[00:13:41.039] >> a move no human would have considered.
+[00:13:43.039] >> Right? So, if these thinking models
+[00:13:44.958] continue to evolve in open domain,
+[00:13:46.639] problem solving, discovering new
+[00:13:48.879] superior cognitive strategies, maybe
+[00:13:50.639] even a new internal language for thought
+[00:13:52.559] that's more efficient than English. What
+[00:13:54.639] will it mean for us when the optimal way
+[00:13:56.720] to solve a complex business problem is
+[00:13:58.799] something no human could have conceived?
+[00:14:01.039] That raises a really important question
+[00:14:02.639] about the future of human AI
+[00:14:04.000] collaboration.
