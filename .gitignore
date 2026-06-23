@@ -1,0 +1,11 @@
+# Ignore everything
+*
+
+# Allow directories
+!*/
+
+# Allow HTML files
+!*.html
+
+# Allow .gitignore
+!.gitignore
